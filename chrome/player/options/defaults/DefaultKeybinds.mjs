@@ -37,6 +37,7 @@ export const DefaultKeybinds = {
   'ZoomInVideo': 'None',
   'ZoomOutVideo': 'None',
   'ZoomReset': 'None',
+  'ResetMouseZoom': 'Digit1',
   'ToggleVisualFilters': 'KeyQ',
 };
 

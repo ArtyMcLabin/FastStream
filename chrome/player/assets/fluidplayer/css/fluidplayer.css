@@ -722,6 +722,14 @@ body {
     inset: 0px;
 }
 
+.video-container.zoomed {
+    transform-origin: 0 0;
+}
+
+.video-container.panning {
+    cursor: grabbing;
+}
+
 .video-container>video {
     position: absolute;
     inset: 0px;

@@ -210,6 +210,10 @@ export class KeybindManager extends EventEmitter {
       this.client.updateCSSFilters();
     });
 
+    this.on('ResetMouseZoom', (e) => {
+      this.client.interfaceController.videoZoomPan.reset();
+    });
+
     this.on('WindowedFullscreen', (e) => {
       this.client.interfaceController.toggleWindowedFullscreen();
     });

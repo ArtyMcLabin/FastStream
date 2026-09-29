@@ -24,6 +24,7 @@ import {SaveManager} from './SaveManager.mjs';
 import {StatusManager, StatusTypes} from './StatusManager.mjs';
 import {SubtitlesManager} from './subtitles/SubtitlesManager.mjs';
 import {ToolManager} from './ToolManager.mjs';
+import {VideoZoomPan} from './VideoZoomPan.mjs';
 import {VolumeControls} from './VolumeControls.mjs';
 
 let MiniplayerCooldown = Date.now() + 500;
@@ -45,6 +46,8 @@ export class InterfaceController {
     this.toolManager.setupUI();
 
     this.fineTimeControls = new FineTimeControls(this.client);
+
+    this.videoZoomPan = new VideoZoomPan();
 
     this.subtitlesManager = new SubtitlesManager(this.client);
 
@@ -214,6 +217,7 @@ export class InterfaceController {
     this.updateToolVisibility();
     this.fineTimeControls.reset();
     this.playbackRateChanger.reset();
+    this.videoZoomPan.reset();
   }
 
   failedToLoad(reason) {
@@ -388,7 +392,7 @@ export class InterfaceController {
       if (e.button === 0) {
         clearTimeout(holdTimeout);
         holdTimeout = setTimeout(() => {
-          if (lastSpeed !== null || !this.client.player) {
+          if (lastSpeed !== null || !this.client.player || this.videoZoomPan.hasDragged()) {
             return;
           }
           wasPlaying = this.state.playing;
@@ -411,6 +415,10 @@ export class InterfaceController {
       }
       clearTimeout(holdTimeout);
     };
+
+    // A pan that starts after the hold-to-speed-up kicked in ends the speed-up,
+    // since the click that would normally end it is swallowed by the pan.
+    this.videoZoomPan.onDragStart = stopSpeedUp;
 
     // DOMElements.videoContainer.addEventListener('mouseup', (e)=>{
     //   stopSpeedUp();
@@ -450,6 +458,13 @@ export class InterfaceController {
       clearTimeout(clickTimeout);
       clickTimeout = setTimeout(() => {
         clickTimeout = null;
+
+        // While zoomed in, a double-click returns to fit instead of running
+        // the configured double-click action.
+        if (clickCount === 2 && this.videoZoomPan.isZoomed()) {
+          this.videoZoomPan.reset();
+          return;
+        }
 
         let clickAction;
         if (clickCount === 1) {
